@@ -14,7 +14,13 @@ test('bst', () => {
 
     expect(binaryTree.find(3.5)).toBe(insertNode);
     expect(binaryTree.find(110)).toBe(null);
-    console.log(insertNode);
 
-    
+
+    console.log(binaryTree);
+    expect(binaryTree.remove(3.5)).toBe(true);
+    expect(binaryTree.remove(2)).toBe(true);
+    expect(binaryTree.remove(2)).toBe(false);
+    expect(binaryTree.remove(3)).toBe(true);
+    expect(binaryTree.remove(3)).toBe(false)
+    console.log(binaryTree);
 });
