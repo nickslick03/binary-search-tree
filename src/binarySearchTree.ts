@@ -8,6 +8,12 @@ export function buildTree<T>(initialArray: T[]) {
     headNode.insert = (value: T) => insert<T>(headNode, value);
     headNode.find = (value: T) => find<T>(headNode, value);
     headNode.remove = (value: T) => remove<T>(headNode, value);
+    headNode.levelOrder = () => levelOrder<T>([headNode]);
+    headNode.preOrder = () => preOrder<T>(headNode);
+    headNode.inOrder = () => inOrder<T>(headNode);
+    headNode.postOrder = () => postOrder<T>(headNode);
+    headNode.height = (node: node<T>) => height<T>(node);
+    headNode.depth = (node: node<T>) => depth<T>(headNode, node);
     return headNode;
 }
 
@@ -34,8 +40,13 @@ type node<T> = {
 type headNode<T> = node<T> & {
     insert(value: T): node<T> | null,
     find(value: T): node<T> | null,
-    remove(value: T): boolean;
-    
+    remove(value: T): boolean,
+    levelOrder(): node<T>[],
+    preOrder(): node<T>[],
+    inOrder(): node<T>[],
+    postOrder(): node<T>[],
+    height(node: node<T>): number,
+    depth(node: node<T>): number,
 }
 
 type child = 'leftChild' | 'rightChild';
@@ -142,3 +153,54 @@ const minReplacement = <T>(node: node<T>): node<T> => {
     }
     return minNode;
 };
+
+const levelOrder = <T>(nodeArray: node<T>[]): node<T>[] => {
+    if (nodeArray.length === 0) return [];
+    const children: node<T>[] = nodeArray
+    .map(node => [node.leftChild, node.rightChild])
+    .flat()
+    .filter(node => node !== null) as node<T>[];
+    return nodeArray.concat(levelOrder(children));
+};
+
+const preOrder = <T>(node: node<T>): node<T>[] => {
+    if (node.leftChild === null && node.rightChild === null)
+        return [node];
+    if (node.leftChild === null)
+        return [node].concat(preOrder(node.rightChild as node<T>));
+    if (node.rightChild === null)
+        return [node].concat(preOrder(node.leftChild));
+    return [node].concat(preOrder(node.leftChild), preOrder(node.rightChild));
+};
+
+const inOrder = <T>(node: node<T>): node<T>[] => {
+    if (node.leftChild === null && node.rightChild === null)
+        return [node];
+    if (node.leftChild === null)
+        return [node].concat(inOrder(node.rightChild as node<T>));
+    if (node.rightChild === null)
+        return inOrder(node.leftChild).concat(node);
+    return inOrder(node.leftChild).concat(node, inOrder(node.rightChild));
+};
+
+const postOrder = <T>(node: node<T>): node<T>[] => {
+    if (node.leftChild === null && node.rightChild === null)
+        return [node];
+    if (node.leftChild === null)
+        return postOrder(node.rightChild as node<T>).concat(node);
+    if (node.rightChild === null)
+        return postOrder(node.leftChild).concat(node);
+    return postOrder(node.leftChild).concat(postOrder(node.rightChild), node);
+};
+
+const height = <T>(node: node<T>): number => 
+    Math.max(
+        node.leftChild ? height(node.leftChild) + 1 : 0, 
+        node.rightChild ? height(node.rightChild) + 1 : 0
+    );
+
+const depth = <T>(root: node<T> | null, node: node<T>): number => {
+    if(root === node) return 0;
+    if(root === null) return Infinity;
+    return 1 + depth(root[root.value < node.value ? 'rightChild' : 'leftChild'], node);
+}
