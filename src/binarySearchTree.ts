@@ -1,5 +1,5 @@
 export function buildTree<T>(initialArray: T[]) {
-    const headNode = 
+    let headNode = 
     chainNodes(
         removeDuplicates(
             mergeSort(initialArray)
@@ -14,6 +14,9 @@ export function buildTree<T>(initialArray: T[]) {
     headNode.postOrder = () => postOrder<T>(headNode);
     headNode.height = (node: node<T>) => height<T>(node);
     headNode.depth = (node: node<T>) => depth<T>(headNode, node);
+    headNode.isBalanced = () => isBalanced<T>(headNode);
+    headNode.rebalance = () =>
+        headNode = buildTree(headNode.inOrder().map(node => node.value));
     return headNode;
 }
 
@@ -47,6 +50,8 @@ type headNode<T> = node<T> & {
     postOrder(): node<T>[],
     height(node: node<T>): number,
     depth(node: node<T>): number,
+    isBalanced(): boolean,
+    rebalance(): void,
 }
 
 type child = 'leftChild' | 'rightChild';
@@ -203,4 +208,9 @@ const depth = <T>(root: node<T> | null, node: node<T>): number => {
     if(root === node) return 0;
     if(root === null) return Infinity;
     return 1 + depth(root[root.value < node.value ? 'rightChild' : 'leftChild'], node);
-}
+};
+
+const isBalanced = <T>(node: node<T>): boolean =>
+    node.leftChild !== null && node.rightChild !== null
+    ? isBalanced(node.leftChild) && isBalanced(node.rightChild)
+    : height(node) < 2;
